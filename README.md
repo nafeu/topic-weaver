@@ -1,6 +1,7 @@
 # Topic Weaver
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/nafeu/topic-weaver/tests.yml)
 
 Topic Weaver lets you generate unique combinations of topics utilizing a hierarchical concept map. Useful for general purpose random text generation, topic combinations, content creation, brainstorming, creative exploration and more.
 
