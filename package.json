@@ -33,6 +33,7 @@
     "build:esm": "tsc -p ./configs/tsconfig.esm.json && mv lib/esm/index.js lib/esm/index.mjs",
     "build:cjs": "tsc -p ./configs/tsconfig.cjs.json",
     "test": "jest",
+    "test:watch": "jest --watch",
     "semantic-release": "semantic-release",
     "prepack": "npm run build",
     "lint": "tsc -p ./configs/tsconfig.base.json --noEmit && eslint *.ts tests/**/*.ts",
