@@ -1,5 +1,6 @@
 const DEFAULT_DELIMITER = '\n';
 const DEFAULT_ID_SYMBOL = '#';
+
 const FIRST_INDEX = 0;
 const SECOND_INDEX = 1;
 const MIN_CONCEPT_KEY_LENGTH = 1;
@@ -66,4 +67,13 @@ export function parseConceptMap(text: string, options: ParsingOptions = {}): Con
   return { concepts, root };
 }
 
-export default { parseConceptMap };
+export function getRandomString(strings: string[]): string | null {
+  if (strings.length === 0) {
+    return null;
+  }
+
+  const randomIndex = Math.floor(Math.random() * strings.length);
+  return strings[randomIndex] || null;
+}
+
+export default { parseConceptMap, getRandomString };

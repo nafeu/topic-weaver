@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { parseConceptMap } from '../index';
+import { parseConceptMap, getRandomString } from '../index';
 
 describe('parseConceptMap', () => {
   describe('given a null or empty text value', () => {
@@ -115,6 +115,30 @@ describe('parseConceptMap', () => {
           });
         });
       });
+    });
+  });
+});
+
+describe('getRandomString', () => {
+  describe('with a valid non-empty array', () => {
+    it('should return a valid item', () => {
+      const myArray = ['apple', 'banana', 'orange', 'grape'];
+      const result = getRandomString(myArray);
+      expect(myArray).toContain(result);
+    });
+  });
+
+  describe('with an empty array', () => {
+    it('should return null', () => {
+      const result = getRandomString([]);
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('with an array with all null or undefined values', () => {
+    it('should return null', () => {
+      const result = getRandomString([null, undefined, null]);
+      expect(result).toBeNull();
     });
   });
 });
