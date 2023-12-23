@@ -340,6 +340,7 @@ describe('generateIdeas', () => {
         },
         count: 1,
         root: 'a',
+        recursionLimit: 4,
       };
 
       const result = generateIdeas(exampleInput);
@@ -348,8 +349,45 @@ describe('generateIdeas', () => {
       expect(result.ideas.length).toBe(1);
       expect([['[a]'], ['[b]']]).toContainEqual(result.ideas);
       expect(result.issues).toEqual([
-        'Recursion limit reached (2000), please expand possible unique combinations in your concept map.',
+        'Recursion limit reached (4), please expand possible unique combinations in your concept map.',
       ]);
+    });
+  });
+  describe('given a small non-empty concept map with a root id', () => {
+    it('should return a missing root id issue', () => {
+      const exampleInput = {
+        concepts: {
+          a: ['[b]'],
+          b: ['[a]'],
+        },
+        count: 1,
+        root: 'x',
+      };
+
+      const result = generateIdeas(exampleInput);
+
+      expect(result.issues.length).toBe(1);
+      expect(result.ideas.length).toBe(0);
+      expect(result.issues).toEqual(['Missing root id (x) in concept map']);
+    });
+  });
+  describe('given a small non-empty concept map with a mismatched id', () => {
+    it('should return an id matching issue', () => {
+      const exampleInput = {
+        concepts: {
+          root: ['[a]'],
+          a: ['[b] [c]'],
+          b: ['x'],
+        },
+        count: 1,
+        root: 'root',
+      };
+
+      const result = generateIdeas(exampleInput);
+
+      expect(result.issues.length).toBe(1);
+      expect(result.ideas.length).toBe(1);
+      expect(result.issues).toEqual(['Could not match the concept: c']);
     });
   });
 });

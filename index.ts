@@ -140,6 +140,7 @@ export const generateIdeas = (generatorRequest: GeneratorRequest) => {
         input = input.replace(match, interpolate(getRandomString(matchedConcept.data) as string));
       } else {
         issues.push(`Could not match the concept: ${id}`);
+        break;
       }
     }
 
@@ -162,7 +163,7 @@ export const generateIdeas = (generatorRequest: GeneratorRequest) => {
 
       attemptCount += 1;
     } else {
-      issues.push('Missing root in concept map.');
+      issues.push(`Missing root id (${root}) in concept map`);
       break;
     }
   }
@@ -173,9 +174,9 @@ export const generateIdeas = (generatorRequest: GeneratorRequest) => {
     );
   }
 
-  issues = [...new Set(issues)] || [];
+  issues = [...new Set(issues)];
 
   return { ideas, issues };
 };
 
-export default { parseConceptMap, getRandomString };
+export default { parseConceptMap, generateIdeas };
