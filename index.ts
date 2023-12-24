@@ -13,11 +13,6 @@ export const PATTERN_ID = /(?<!\[)\[(?:(?!\[\[).)*?\](?!\])/g;
 export const PATTERN_SQUARE_BRACKET = /^\[|\]$/g;
 export const PATTERN_DOUBLE_SQUARE_BRACKET = /\[\[(.*?)\]\]/g;
 
-interface ParsingOptions {
-  delimiter?: string;
-  idSymbol?: string;
-}
-
 type Concepts = {
   [key: string]: string[];
 };
@@ -27,9 +22,24 @@ interface ConceptMap {
   root: string | null;
 }
 
+interface ParsingOptions {
+  delimiter?: string;
+  idSymbol?: string;
+}
+
 interface GeneratorOptions {
   attemptLimit?: number;
   recursionLimit?: number;
+}
+
+interface WeaveOptions {
+  parsingOptions?: ParsingOptions;
+  generatorOptions?: GeneratorOptions;
+}
+
+interface Topics {
+  topics: string[];
+  issues: string[];
 }
 
 export function parseConceptMap(text: string, options: ParsingOptions = {}): ConceptMap {
@@ -88,7 +98,7 @@ export function getRandomString(strings: string[]): string | null {
   return strings[randomIndex] || null;
 }
 
-export const generateIdeas = (conceptMap: ConceptMap, count: number, options: GeneratorOptions = {}) => {
+export function generateTopics(conceptMap: ConceptMap, count: number, options: GeneratorOptions = {}): Topics {
   const { concepts, root } = conceptMap;
 
   const { attemptLimit = DEFAULT_ATTEMPT_LIMIT, recursionLimit = DEFAULT_RECURSION_LIMIT } = options;
@@ -98,11 +108,11 @@ export const generateIdeas = (conceptMap: ConceptMap, count: number, options: Ge
     data: concepts[key],
   }));
 
-  let originalIdeaCounter = count;
+  let originalTopicCounter = count;
   let attemptCount = 0;
   let recursionCount = 0;
 
-  const ideas: string[] = [];
+  const topics: string[] = [];
   let issues = [];
 
   const interpolate = (inputString: string) => {
@@ -140,18 +150,18 @@ export const generateIdeas = (conceptMap: ConceptMap, count: number, options: Ge
     return input;
   };
 
-  while (originalIdeaCounter > 0 && attemptCount < attemptLimit) {
+  while (originalTopicCounter > 0 && attemptCount < attemptLimit) {
     const rootConcept = conceptCollection.find((concept) => concept.id === root);
 
     if (rootConcept) {
       const randomStringRootConcept = getRandomString(rootConcept.data);
-      const idea = interpolate(randomStringRootConcept as string);
+      const topic = interpolate(randomStringRootConcept as string);
 
-      const isOriginalIdea = !ideas.includes(idea);
+      const isOriginalTopic = !topics.includes(topic);
 
-      if (isOriginalIdea) {
-        ideas.push(idea);
-        originalIdeaCounter -= 1;
+      if (isOriginalTopic) {
+        topics.push(topic);
+        originalTopicCounter -= 1;
       }
 
       attemptCount += 1;
@@ -169,7 +179,16 @@ export const generateIdeas = (conceptMap: ConceptMap, count: number, options: Ge
 
   issues = [...new Set(issues)];
 
-  return { ideas, issues };
-};
+  return { topics, issues };
+}
 
-export default { parseConceptMap, generateIdeas };
+export function weaveTopics(text: string, count: number, options: WeaveOptions = {}): Topics {
+  const { parsingOptions = {}, generatorOptions = {} } = options;
+
+  const conceptMap = parseConceptMap(text, parsingOptions);
+  const output = generateTopics(conceptMap, count, generatorOptions);
+
+  return output;
+}
+
+export default { parseConceptMap, generateTopics, weaveTopics };

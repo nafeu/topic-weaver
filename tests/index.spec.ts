@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { parseConceptMap, getRandomString, generateIdeas, PATTERN_ID } from '../index';
+import { parseConceptMap, getRandomString, generateTopics, PATTERN_ID, weaveTopics } from '../index';
 
 describe('parseConceptMap', () => {
   describe('given a null or empty text value', () => {
@@ -180,81 +180,81 @@ describe('PATTERN_ID', () => {
   });
 });
 
-describe('generateIdeas', () => {
+describe('generateTopics', () => {
   describe('given a valid non-empty concept map, count, and root', () => {
     describe('when count = 1', () => {
       it('should generate empty issues and an ideas array', () => {
-        const result = generateIdeas({ concepts: { root: ['a', 'b'] }, root: 'root' }, 1);
+        const result = generateTopics({ concepts: { root: ['a', 'b'] }, root: 'root' }, 1);
 
-        expect(result.ideas.length).toBe(1);
-        expect([['a'], ['b']]).toContainEqual(result.ideas);
+        expect(result.topics.length).toBe(1);
+        expect([['a'], ['b']]).toContainEqual(result.topics);
       });
     });
     describe('when count > 1', () => {
       it('should generate empty issues and an ideas array', () => {
-        const result = generateIdeas({ concepts: { root: ['a', 'b'] }, root: 'root' }, 2);
+        const result = generateTopics({ concepts: { root: ['a', 'b'] }, root: 'root' }, 2);
 
         expect(result.issues.length).toBe(0);
-        expect(result.ideas.length).toBe(2);
-        expect([['a', 'b'], ['b', 'a'], ['a'], ['b']]).toContainEqual(result.ideas);
+        expect(result.topics.length).toBe(2);
+        expect([['a', 'b'], ['b', 'a'], ['a'], ['b']]).toContainEqual(result.topics);
       });
     });
     describe('when given a heirarchy with count = 1', () => {
       it('should generate empty issues and an ideas array', () => {
-        const result = generateIdeas({ concepts: { root: ['[a] [b]'], a: ['1'], b: ['2'] }, root: 'root' }, 1);
+        const result = generateTopics({ concepts: { root: ['[a] [b]'], a: ['1'], b: ['2'] }, root: 'root' }, 1);
 
         expect(result.issues.length).toBe(0);
-        expect(result.ideas.length).toBe(1);
-        expect([['1 2']]).toContainEqual(result.ideas);
+        expect(result.topics.length).toBe(1);
+        expect([['1 2']]).toContainEqual(result.topics);
       });
     });
     describe('when given an extended heirarchy with count = 1', () => {
       it('should generate empty issues and an ideas array', () => {
-        const result = generateIdeas(
+        const result = generateTopics(
           { concepts: { root: ['[a] [b]'], a: ['1', '2'], b: ['3', '4'] }, root: 'root' },
           1,
         );
 
         expect(result.issues.length).toBe(0);
-        expect(result.ideas.length).toBe(1);
-        expect([['1 3'], ['1 4'], ['2 3'], ['2 4']]).toContainEqual(result.ideas);
+        expect(result.topics.length).toBe(1);
+        expect([['1 3'], ['1 4'], ['2 3'], ['2 4']]).toContainEqual(result.topics);
       });
     });
     describe('when given no-spaces in root with count = 1', () => {
       it('should generate empty issues and an ideas array', () => {
-        const result = generateIdeas({ concepts: { root: ['[a][b]'], a: ['1'], b: ['2'] }, root: 'root' }, 1);
+        const result = generateTopics({ concepts: { root: ['[a][b]'], a: ['1'], b: ['2'] }, root: 'root' }, 1);
 
         expect(result.issues.length).toBe(0);
-        expect(result.ideas.length).toBe(1);
-        expect(result.ideas[0]).toEqual('12');
+        expect(result.topics.length).toBe(1);
+        expect(result.topics[0]).toEqual('12');
       });
     });
     describe('when given escaped square brackets in root with count = 1', () => {
       it('should generate empty issues and an ideas array', () => {
-        const resultA = generateIdeas({ concepts: { root: ['[[a]][b]'], a: ['1'], b: ['2'] }, root: 'root' }, 1);
+        const resultA = generateTopics({ concepts: { root: ['[[a]][b]'], a: ['1'], b: ['2'] }, root: 'root' }, 1);
 
         expect(resultA.issues.length).toBe(0);
-        expect(resultA.ideas.length).toBe(1);
-        expect(resultA.ideas[0]).toEqual('[a]2');
+        expect(resultA.topics.length).toBe(1);
+        expect(resultA.topics[0]).toEqual('[a]2');
 
-        const resultB = generateIdeas(
+        const resultB = generateTopics(
           { concepts: { root: ['[[a]] [b] [[c]] [d][e]'], b: ['1'], d: ['2'], e: ['3'] }, root: 'root' },
           1,
         );
 
         expect(resultB.issues.length).toBe(0);
-        expect(resultB.ideas.length).toBe(1);
-        expect(resultB.ideas[0]).toEqual('[a] 1 [c] 23');
+        expect(resultB.topics.length).toBe(1);
+        expect(resultB.topics[0]).toEqual('[a] 1 [c] 23');
       });
     });
   });
   describe('given a small valid non-empty concept map with high count, and root', () => {
     it('should return a maximum attempt issue', () => {
-      const result = generateIdeas({ concepts: { root: ['a'] }, root: 'root' }, 2, { attemptLimit: 2 });
+      const result = generateTopics({ concepts: { root: ['a'] }, root: 'root' }, 2, { attemptLimit: 2 });
 
       expect(result.issues.length).toBe(1);
-      expect(result.ideas.length).toBe(1);
-      expect([['a']]).toContainEqual(result.ideas);
+      expect(result.topics.length).toBe(1);
+      expect([['a']]).toContainEqual(result.topics);
       expect(result.issues).toEqual([
         'Maximum attempts reached (2), please expand possible unique combinations in your concept map.',
       ]);
@@ -262,11 +262,11 @@ describe('generateIdeas', () => {
   });
   describe('given a small non-empty concept map with a cyclical mapping', () => {
     it('should return a maximum recursion issue', () => {
-      const result = generateIdeas({ concepts: { a: ['[b]'], b: ['[a]'] }, root: 'a' }, 1, { recursionLimit: 4 });
+      const result = generateTopics({ concepts: { a: ['[b]'], b: ['[a]'] }, root: 'a' }, 1, { recursionLimit: 4 });
 
       expect(result.issues.length).toBe(1);
-      expect(result.ideas.length).toBe(1);
-      expect([['[a]'], ['[b]']]).toContainEqual(result.ideas);
+      expect(result.topics.length).toBe(1);
+      expect([['[a]'], ['[b]']]).toContainEqual(result.topics);
       expect(result.issues).toEqual([
         'Recursion limit reached (4), please expand possible unique combinations in your concept map.',
       ]);
@@ -274,20 +274,73 @@ describe('generateIdeas', () => {
   });
   describe('given a small non-empty concept map with a root id', () => {
     it('should return a missing root id issue', () => {
-      const result = generateIdeas({ concepts: { a: ['[b]'], b: ['[a]'] }, root: 'x' }, 1);
+      const result = generateTopics({ concepts: { a: ['[b]'], b: ['[a]'] }, root: 'x' }, 1);
 
       expect(result.issues.length).toBe(1);
-      expect(result.ideas.length).toBe(0);
+      expect(result.topics.length).toBe(0);
       expect(result.issues).toEqual(['Missing root id (x) in concept map']);
     });
   });
   describe('given a small non-empty concept map with a mismatched id', () => {
     it('should return an id matching issue', () => {
-      const result = generateIdeas({ concepts: { root: ['[a]'], a: ['[b] [c]'], b: ['x'] }, root: 'root' }, 1);
+      const result = generateTopics({ concepts: { root: ['[a]'], a: ['[b] [c]'], b: ['x'] }, root: 'root' }, 1);
 
       expect(result.issues.length).toBe(1);
-      expect(result.ideas.length).toBe(1);
+      expect(result.topics.length).toBe(1);
       expect(result.issues).toEqual(['Could not match the concept: c']);
+    });
+  });
+});
+
+describe('weaveTopics', () => {
+  describe('given a valid raw conceptMap string and count', () => {
+    it('should return an appropriate array of string results', () => {
+      const result = weaveTopics(`#root\ndraw a [color] [shape]\n#color\nred\nblue\n#shape\nsquare\ncircle`, 2);
+
+      expect(result.topics.length).toBe(2);
+      expect(result.issues.length).toBe(0);
+      expect([
+        ['draw a red circle', 'draw a red square'],
+        ['draw a red square', 'draw a red circle'],
+        ['draw a red circle', 'draw a blue circle'],
+        ['draw a blue circle', 'draw a red circle'],
+        ['draw a red square', 'draw a blue circle'],
+        ['draw a blue circle', 'draw a red square'],
+        ['draw a red square', 'draw a blue square'],
+        ['draw a blue square', 'draw a red square'],
+        ['draw a blue circle', 'draw a blue square'],
+        ['draw a blue square', 'draw a blue circle'],
+        ['draw a blue square', 'draw a red circle'],
+        ['draw a red circle', 'draw a blue square'],
+        ['draw a blue square', 'draw a red square'],
+        ['draw a red square', 'draw a blue square'],
+      ]).toContainEqual(result.topics);
+    });
+  });
+  describe('given a valid raw conceptMap string, count and options', () => {
+    it('should return an appropriate array of string results with issues', () => {
+      const result = weaveTopics(`$root;draw a [color] [shape];$color;red;blue;$shape;square;circle`, 4, {
+        parsingOptions: {
+          delimiter: ';',
+          idSymbol: '$',
+        },
+        generatorOptions: {
+          attemptLimit: 2,
+          recursionLimit: 2,
+        },
+      });
+
+      expect(result.topics.length).toBe(2);
+      expect([
+        [
+          'Recursion limit reached (2), please expand possible unique combinations in your concept map.',
+          'Maximum attempts reached (2), please expand possible unique combinations in your concept map.',
+        ],
+        [
+          'Maximum attempts reached (2), please expand possible unique combinations in your concept map.',
+          'Recursion limit reached (2), please expand possible unique combinations in your concept map.',
+        ],
+      ]).toContainEqual(result.issues);
     });
   });
 });
