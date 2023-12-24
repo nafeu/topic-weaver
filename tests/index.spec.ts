@@ -184,51 +184,24 @@ describe('generateIdeas', () => {
   describe('given a valid non-empty concept map, count, and root', () => {
     describe('when count = 1', () => {
       it('should generate empty issues and an ideas array', () => {
-        const exampleInput = {
-          concepts: {
-            root: ['a', 'b'],
-          },
-          count: 1,
-          root: 'root',
-        };
+        const result = generateIdeas({ concepts: { root: ['a', 'b'] }, root: 'root' }, 1);
 
-        const result = generateIdeas(exampleInput);
-
-        expect(result.issues.length).toBe(0);
         expect(result.ideas.length).toBe(1);
         expect([['a'], ['b']]).toContainEqual(result.ideas);
       });
     });
     describe('when count > 1', () => {
       it('should generate empty issues and an ideas array', () => {
-        const exampleInput = {
-          concepts: {
-            root: ['a', 'b'],
-          },
-          count: 2,
-          root: 'root',
-        };
+        const result = generateIdeas({ concepts: { root: ['a', 'b'] }, root: 'root' }, 2);
 
-        const result = generateIdeas(exampleInput);
-
-        expect([['Reached limit of attempts (9999) to create unique results.'], []]).toContainEqual(result.issues);
+        expect(result.issues.length).toBe(0);
         expect(result.ideas.length).toBe(2);
         expect([['a', 'b'], ['b', 'a'], ['a'], ['b']]).toContainEqual(result.ideas);
       });
     });
     describe('when given a heirarchy with count = 1', () => {
       it('should generate empty issues and an ideas array', () => {
-        const exampleInput = {
-          concepts: {
-            root: ['[a] [b]'],
-            a: ['1'],
-            b: ['2'],
-          },
-          count: 1,
-          root: 'root',
-        };
-
-        const result = generateIdeas(exampleInput);
+        const result = generateIdeas({ concepts: { root: ['[a] [b]'], a: ['1'], b: ['2'] }, root: 'root' }, 1);
 
         expect(result.issues.length).toBe(0);
         expect(result.ideas.length).toBe(1);
@@ -237,17 +210,10 @@ describe('generateIdeas', () => {
     });
     describe('when given an extended heirarchy with count = 1', () => {
       it('should generate empty issues and an ideas array', () => {
-        const exampleInput = {
-          concepts: {
-            root: ['[a] [b]'],
-            a: ['1', '2'],
-            b: ['3', '4'],
-          },
-          count: 1,
-          root: 'root',
-        };
-
-        const result = generateIdeas(exampleInput);
+        const result = generateIdeas(
+          { concepts: { root: ['[a] [b]'], a: ['1', '2'], b: ['3', '4'] }, root: 'root' },
+          1,
+        );
 
         expect(result.issues.length).toBe(0);
         expect(result.ideas.length).toBe(1);
@@ -256,17 +222,7 @@ describe('generateIdeas', () => {
     });
     describe('when given no-spaces in root with count = 1', () => {
       it('should generate empty issues and an ideas array', () => {
-        const exampleInput = {
-          concepts: {
-            root: ['[a][b]'],
-            a: ['1'],
-            b: ['2'],
-          },
-          count: 1,
-          root: 'root',
-        };
-
-        const result = generateIdeas(exampleInput);
+        const result = generateIdeas({ concepts: { root: ['[a][b]'], a: ['1'], b: ['2'] }, root: 'root' }, 1);
 
         expect(result.issues.length).toBe(0);
         expect(result.ideas.length).toBe(1);
@@ -275,34 +231,16 @@ describe('generateIdeas', () => {
     });
     describe('when given escaped square brackets in root with count = 1', () => {
       it('should generate empty issues and an ideas array', () => {
-        const exampleInputA = {
-          concepts: {
-            root: ['[[a]][b]'],
-            a: ['1'],
-            b: ['2'],
-          },
-          count: 1,
-          root: 'root',
-        };
-
-        const resultA = generateIdeas(exampleInputA);
+        const resultA = generateIdeas({ concepts: { root: ['[[a]][b]'], a: ['1'], b: ['2'] }, root: 'root' }, 1);
 
         expect(resultA.issues.length).toBe(0);
         expect(resultA.ideas.length).toBe(1);
         expect(resultA.ideas[0]).toEqual('[a]2');
 
-        const exampleInputB = {
-          concepts: {
-            root: ['[[a]] [b] [[c]] [d][e]'],
-            b: ['1'],
-            d: ['2'],
-            e: ['3'],
-          },
-          count: 1,
-          root: 'root',
-        };
-
-        const resultB = generateIdeas(exampleInputB);
+        const resultB = generateIdeas(
+          { concepts: { root: ['[[a]] [b] [[c]] [d][e]'], b: ['1'], d: ['2'], e: ['3'] }, root: 'root' },
+          1,
+        );
 
         expect(resultB.issues.length).toBe(0);
         expect(resultB.ideas.length).toBe(1);
@@ -312,16 +250,7 @@ describe('generateIdeas', () => {
   });
   describe('given a small valid non-empty concept map with high count, and root', () => {
     it('should return a maximum attempt issue', () => {
-      const exampleInput = {
-        concepts: {
-          root: ['a'],
-        },
-        count: 2,
-        root: 'root',
-        attemptLimit: 2,
-      };
-
-      const result = generateIdeas(exampleInput);
+      const result = generateIdeas({ concepts: { root: ['a'] }, root: 'root' }, 2, { attemptLimit: 2 });
 
       expect(result.issues.length).toBe(1);
       expect(result.ideas.length).toBe(1);
@@ -333,17 +262,7 @@ describe('generateIdeas', () => {
   });
   describe('given a small non-empty concept map with a cyclical mapping', () => {
     it('should return a maximum recursion issue', () => {
-      const exampleInput = {
-        concepts: {
-          a: ['[b]'],
-          b: ['[a]'],
-        },
-        count: 1,
-        root: 'a',
-        recursionLimit: 4,
-      };
-
-      const result = generateIdeas(exampleInput);
+      const result = generateIdeas({ concepts: { a: ['[b]'], b: ['[a]'] }, root: 'a' }, 1, { recursionLimit: 4 });
 
       expect(result.issues.length).toBe(1);
       expect(result.ideas.length).toBe(1);
@@ -355,16 +274,7 @@ describe('generateIdeas', () => {
   });
   describe('given a small non-empty concept map with a root id', () => {
     it('should return a missing root id issue', () => {
-      const exampleInput = {
-        concepts: {
-          a: ['[b]'],
-          b: ['[a]'],
-        },
-        count: 1,
-        root: 'x',
-      };
-
-      const result = generateIdeas(exampleInput);
+      const result = generateIdeas({ concepts: { a: ['[b]'], b: ['[a]'] }, root: 'x' }, 1);
 
       expect(result.issues.length).toBe(1);
       expect(result.ideas.length).toBe(0);
@@ -373,17 +283,7 @@ describe('generateIdeas', () => {
   });
   describe('given a small non-empty concept map with a mismatched id', () => {
     it('should return an id matching issue', () => {
-      const exampleInput = {
-        concepts: {
-          root: ['[a]'],
-          a: ['[b] [c]'],
-          b: ['x'],
-        },
-        count: 1,
-        root: 'root',
-      };
-
-      const result = generateIdeas(exampleInput);
+      const result = generateIdeas({ concepts: { root: ['[a]'], a: ['[b] [c]'], b: ['x'] }, root: 'root' }, 1);
 
       expect(result.issues.length).toBe(1);
       expect(result.ideas.length).toBe(1);

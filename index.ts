@@ -27,12 +27,9 @@ interface ConceptMap {
   root: string | null;
 }
 
-interface GeneratorRequest {
+interface GeneratorOptions {
   attemptLimit?: number;
-  concepts: Concepts;
-  count: number;
   recursionLimit?: number;
-  root: string;
 }
 
 export function parseConceptMap(text: string, options: ParsingOptions = {}): ConceptMap {
@@ -91,14 +88,10 @@ export function getRandomString(strings: string[]): string | null {
   return strings[randomIndex] || null;
 }
 
-export const generateIdeas = (generatorRequest: GeneratorRequest) => {
-  const {
-    attemptLimit = DEFAULT_ATTEMPT_LIMIT,
-    concepts,
-    count,
-    recursionLimit = DEFAULT_RECURSION_LIMIT,
-    root,
-  } = generatorRequest;
+export const generateIdeas = (conceptMap: ConceptMap, count: number, options: GeneratorOptions = {}) => {
+  const { concepts, root } = conceptMap;
+
+  const { attemptLimit = DEFAULT_ATTEMPT_LIMIT, recursionLimit = DEFAULT_RECURSION_LIMIT } = options;
 
   const conceptCollection = Object.keys(concepts).map((key) => ({
     id: key,
