@@ -1,6 +1,6 @@
 {
   "name": "@nafeu/topic-weaver",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Generate random topic combinations from hierarchical concept maps.",
   "keywords": [
     "generate",
