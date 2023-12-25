@@ -9,7 +9,7 @@ Topic Weaver lets you generate unique combinations of topics utilizing a hierarc
 ## Installation
 
 ```bash
-npm install @nafeu/topic-weaver
+npm install topic-weaver
 ```
 
 ## Usage
