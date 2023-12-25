@@ -343,4 +343,25 @@ describe('weaveTopics', () => {
       ]).toContainEqual(result.issues);
     });
   });
+  describe('given a valid multiline raw conceptMap string and count', () => {
+    it('should return an appropriate array of string results', () => {
+      const conceptMap = `
+        #prompt
+        Draw a [color] [shape].
+        #color
+        red
+        #shape
+        circle
+        square
+      `;
+
+      const result = weaveTopics(conceptMap, 2);
+
+      expect(result.topics.length).toBe(2);
+      expect([
+        ['Draw a red circle.', 'Draw a red square.'],
+        ['Draw a red square.', 'Draw a red circle.'],
+      ]).toContainEqual(result.topics);
+    });
+  });
 });

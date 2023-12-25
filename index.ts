@@ -57,11 +57,14 @@ export function parseConceptMap(text: string, options: ParsingOptions = {}): Con
 
   const concepts: Concepts = {};
 
-  const conceptText = text.split(delimiter).filter((item) => {
-    const isItemNotEmpty = item.length > 0 && item !== '';
+  const conceptText = text
+    .split(delimiter)
+    .filter((line) => {
+      const isLineNotEmpty = line.length > 0 && line !== '' && line.trim() !== '';
 
-    return isItemNotEmpty;
-  });
+      return isLineNotEmpty;
+    })
+    .map((line) => line.trim());
 
   let activeKey: string | null = null;
   let root: string | null = null;
