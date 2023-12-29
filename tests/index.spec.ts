@@ -259,6 +259,14 @@ describe('generateTopics', () => {
         'Maximum attempts reached (2), please expand possible unique combinations in your concept map.',
       ]);
     });
+
+    describe('in strict mode', () => {
+      it('should throw an error', () => {
+        expect(() =>
+          generateTopics({ concepts: { root: ['a'] }, root: 'root' }, 2, { attemptLimit: 2, strictMode: true }),
+        ).toThrow('Maximum attempts reached (2), please expand possible unique combinations in your concept map.');
+      });
+    });
   });
   describe('given a small non-empty concept map with a cyclical mapping', () => {
     it('should return a maximum recursion issue', () => {
@@ -271,6 +279,17 @@ describe('generateTopics', () => {
         'Recursion limit reached (4), please expand possible unique combinations in your concept map.',
       ]);
     });
+
+    describe('in strict mode', () => {
+      it('should throw an error', () => {
+        expect(() =>
+          generateTopics({ concepts: { a: ['[b]'], b: ['[a]'] }, root: 'a' }, 1, {
+            recursionLimit: 4,
+            strictMode: true,
+          }),
+        ).toThrow('Recursion limit reached (4), please expand possible unique combinations in your concept map.');
+      });
+    });
   });
   describe('given a small non-empty concept map with a root id', () => {
     it('should return a missing root id issue', () => {
@@ -280,6 +299,14 @@ describe('generateTopics', () => {
       expect(result.topics.length).toBe(0);
       expect(result.issues).toEqual(['Missing root id (x) in concept map']);
     });
+
+    describe('in strict mode', () => {
+      it('should throw an error', () => {
+        expect(() =>
+          generateTopics({ concepts: { a: ['[b]'], b: ['[a]'] }, root: 'x' }, 1, { strictMode: true }),
+        ).toThrow('Missing root id (x) in concept map');
+      });
+    });
   });
   describe('given a small non-empty concept map with a mismatched id', () => {
     it('should return an id matching issue', () => {
@@ -288,6 +315,16 @@ describe('generateTopics', () => {
       expect(result.issues.length).toBe(1);
       expect(result.topics.length).toBe(1);
       expect(result.issues).toEqual(['Could not match the concept: c']);
+    });
+
+    describe('in strict mode', () => {
+      it('should throw an error', () => {
+        expect(() =>
+          generateTopics({ concepts: { root: ['[a]'], a: ['[b] [c]'], b: ['x'] }, root: 'root' }, 1, {
+            strictMode: true,
+          }),
+        ).toThrow('Could not match the concept: c');
+      });
     });
   });
 });

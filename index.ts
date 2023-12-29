@@ -30,6 +30,7 @@ interface ParsingOptions {
 interface GeneratorOptions {
   attemptLimit?: number;
   recursionLimit?: number;
+  strictMode?: boolean;
 }
 
 interface WeaveOptions {
@@ -104,7 +105,7 @@ export function getRandomString(strings: string[]): string | null {
 export function generateTopics(conceptMap: ConceptMap, count: number, options: GeneratorOptions = {}): Topics {
   const { concepts, root } = conceptMap;
 
-  const { attemptLimit = DEFAULT_ATTEMPT_LIMIT, recursionLimit = DEFAULT_RECURSION_LIMIT } = options;
+  const { attemptLimit = DEFAULT_ATTEMPT_LIMIT, recursionLimit = DEFAULT_RECURSION_LIMIT, strictMode } = options;
 
   const conceptCollection = Object.keys(concepts).map((key) => ({
     id: key,
@@ -122,9 +123,14 @@ export function generateTopics(conceptMap: ConceptMap, count: number, options: G
     recursionCount += 1;
 
     if (recursionCount >= recursionLimit) {
-      issues.push(
-        `Recursion limit reached (${recursionLimit}), please expand possible unique combinations in your concept map.`,
-      );
+      const issueMessage = `Recursion limit reached (${recursionLimit}), please expand possible unique combinations in your concept map.`;
+
+      if (strictMode) {
+        throw new Error(issueMessage);
+      }
+
+      issues.push(issueMessage);
+
       return inputString;
     }
 
@@ -145,7 +151,13 @@ export function generateTopics(conceptMap: ConceptMap, count: number, options: G
       if (matchedConcept) {
         input = input.replace(match, interpolate(getRandomString(matchedConcept.data) as string));
       } else {
-        issues.push(`Could not match the concept: ${id}`);
+        const issueMessage = `Could not match the concept: ${id}`;
+
+        if (strictMode) {
+          throw new Error(issueMessage);
+        }
+
+        issues.push(issueMessage);
         break;
       }
     }
@@ -169,15 +181,25 @@ export function generateTopics(conceptMap: ConceptMap, count: number, options: G
 
       attemptCount += 1;
     } else {
-      issues.push(`Missing root id (${root}) in concept map`);
+      const issueMessage = `Missing root id (${root}) in concept map`;
+
+      if (strictMode) {
+        throw new Error(issueMessage);
+      }
+
+      issues.push(issueMessage);
       break;
     }
   }
 
   if (attemptCount === attemptLimit) {
-    issues.push(
-      `Maximum attempts reached (${attemptLimit}), please expand possible unique combinations in your concept map.`,
-    );
+    const issueMessage = `Maximum attempts reached (${attemptLimit}), please expand possible unique combinations in your concept map.`;
+
+    if (strictMode) {
+      throw new Error(issueMessage);
+    }
+
+    issues.push(issueMessage);
   }
 
   issues = [...new Set(issues)];

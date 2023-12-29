@@ -45,7 +45,11 @@ Draw a red square.
 
 ## Documentation
 
-TODO: ...
+|Option|Type|Description|Syntax
+|-|-|-|-|
+|**strictMode**|_boolean_|Throw an error if an issue occurs during topic generation|`weaveTopics(conceptMap, count, { strictMode: true })`
+
+>TODO: Update...
 
 ## Contributing
 
