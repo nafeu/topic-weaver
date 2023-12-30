@@ -50,7 +50,7 @@ Draw a red square.
 
 |Option|Type|Description|Syntax
 |-|-|-|-|
-|**strictMode**|_boolean_|Throw an error if an issue occurs during topic generation|`weaveTopics(conceptMap, count, { strictMode: true })`
+|**strictMode**|_boolean_|Throw an error if an issue occurs during topic generation|`weaveTopics(conceptMap, count, { generatorOptions: { strictMode: true } })`
 
 >TODO: Update...
 
