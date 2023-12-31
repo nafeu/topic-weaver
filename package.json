@@ -1,6 +1,6 @@
 {
   "name": "topic-weaver",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Generate random topic combinations from hierarchical concept maps.",
   "keywords": [
     "generate",
