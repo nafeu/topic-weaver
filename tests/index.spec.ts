@@ -247,6 +247,52 @@ describe('generateTopics', () => {
         expect(resultB.topics[0]).toEqual('[a] 1 [c] 23');
       });
     });
+    describe('when given a * symbol for fixed value generation', () => {
+      it('should generate empty issues and an ideas array', () => {
+        const result = generateTopics(
+          {
+            concepts: {
+              root: ['[a*x][a*x][a*x][a*x][a*x][a*x][a*x][a*x][a*x][a*x][b]'],
+              a: ['3', '4', '5'],
+              b: ['2'],
+            },
+            root: 'root',
+          },
+          1,
+        );
+
+        expect(result.issues.length).toBe(0);
+        expect(result.topics.length).toBe(1);
+        expect([['33333333332'], ['44444444442'], ['55555555552']]).toContainEqual(result.topics);
+      });
+
+      describe('when given multiple fixed value caching ids', () => {
+        it('should generate empty issues and an ideas array', () => {
+          const result = generateTopics(
+            {
+              concepts: {
+                root: ['[a*x][a*x][a*y][a*y]'],
+                a: ['3', '4'],
+              },
+              root: 'root',
+            },
+            1,
+          );
+
+          expect(result.issues.length).toBe(0);
+          expect(result.topics.length).toBe(1);
+          expect([['3344'], ['3333'], ['4444'], ['4433']]).toContainEqual(result.topics);
+        });
+      });
+
+      describe('when more than one * symbol is used in the id', () => {
+        it('should throw an error', () => {
+          expect(() => generateTopics({ concepts: { root: ['[a*x*y]'], a: ['1'] }, root: 'root' }, 1)).toThrow(
+            'Invalid concept map id, too many * symbols: a*x*y',
+          );
+        });
+      });
+    });
   });
   describe('given a small valid non-empty concept map with high count, and root', () => {
     it('should return a maximum attempt issue', () => {

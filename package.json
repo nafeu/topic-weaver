@@ -33,6 +33,7 @@
     "build:esm": "tsc -p ./configs/tsconfig.esm.json && mv lib/esm/index.js lib/esm/index.mjs",
     "build:cjs": "tsc -p ./configs/tsconfig.cjs.json",
     "test": "jest",
+    "test:debug": "node --inspect-brk -r ts-node/register ./node_modules/.bin/jest --runInBand",
     "test:watch": "jest --watch",
     "coverage": "jest --coverage",
     "coverage:watch": "jest --coverage --watch",

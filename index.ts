@@ -13,6 +13,8 @@ export const PATTERN_ID = /(?<!\[)\[(?:(?!\[\[).)*?\](?!\])/g;
 export const PATTERN_SQUARE_BRACKET = /^\[|\]$/g;
 export const PATTERN_DOUBLE_SQUARE_BRACKET = /\[\[(.*?)\]\]/g;
 
+const FIXED_VALUE_ID_DELIMITER = '*';
+
 type Concepts = {
   [key: string]: string[];
 };
@@ -42,6 +44,10 @@ interface Topics {
   topics: string[];
   issues: string[];
 }
+
+type FixedValueCache = {
+  [key: string]: { [innerKey: string]: string };
+};
 
 export function parseConceptMap(text: string, options: ParsingOptions = {}): ConceptMap {
   const isMissingText: boolean = text === null || text === undefined || text.length === 0;
@@ -104,6 +110,7 @@ export function getRandomString(strings: string[]): string | null {
 
 export function generateTopics(conceptMap: ConceptMap, count: number, options: GeneratorOptions = {}): Topics {
   const { concepts, root } = conceptMap;
+  const fixedValueCache: FixedValueCache = {};
 
   const { attemptLimit = DEFAULT_ATTEMPT_LIMIT, recursionLimit = DEFAULT_RECURSION_LIMIT, strictMode } = options;
 
@@ -145,11 +152,40 @@ export function generateTopics(conceptMap: ConceptMap, count: number, options: G
         continue;
       }
 
-      const id = match.replace(PATTERN_SQUARE_BRACKET, '');
+      const fullId = match.replace(PATTERN_SQUARE_BRACKET, '');
+      const [id, fixedValueCacheId] = fullId.split(FIXED_VALUE_ID_DELIMITER);
+
+      const starSymbolCount: number | undefined = fullId.match(/\*/g)?.length;
+      const isInvalidCacheId = starSymbolCount && starSymbolCount > 1;
+
+      if (isInvalidCacheId) {
+        throw new Error(`Invalid concept map id, too many * symbols: ${fullId}`);
+      }
+
       const matchedConcept = conceptCollection.find((concept) => concept.id === id);
 
       if (matchedConcept) {
-        input = input.replace(match, interpolate(getRandomString(matchedConcept.data) as string));
+        const isFixedValueInCache =
+          fixedValueCacheId && fixedValueCache[id] && fixedValueCache[id][fixedValueCacheId] !== undefined;
+
+        if (isFixedValueInCache) {
+          const cachedString = fixedValueCache[id][fixedValueCacheId];
+
+          input = input.replace(match, cachedString as string);
+        } else {
+          const interpolatedString = interpolate(getRandomString(matchedConcept.data) as string);
+
+          if (fixedValueCacheId && fixedValueCache[id]) {
+            fixedValueCache[id] = {
+              ...fixedValueCache[id],
+              [fixedValueCacheId]: interpolatedString,
+            };
+          } else if (fixedValueCacheId) {
+            fixedValueCache[id] = { [fixedValueCacheId]: interpolatedString };
+          }
+
+          input = input.replace(match, interpolatedString as string);
+        }
       } else {
         const issueMessage = `Could not match the concept: ${id}`;
 
