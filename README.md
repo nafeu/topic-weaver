@@ -15,44 +15,220 @@ npm install topic-weaver
 
 ## Usage
 
-#### Simple Example:
+### Import:
 
 ```javascript
-import { weaveTopics } from 'topic-weaver';
+const { weaveTopics } = require('topic-weaver');
+// import { weaveTopics } from 'topic-weaver' // for ESM
+```
+
+### Simple Examples:
+
+> **Pick a meeting leader or notetaker:**
+
+```javascript
+const { weaveTopics } = require('topic-weaver');
 
 const conceptMap = `
   #prompt
-  Draw a [color] [shape].
+  Today's meeting notetaker is [person].
 
-  #color
-  red
-
-  #shape
-  circle
-  square
+  #person
+  Erlich
+  Gilfoyle
+  Dinesh
+  Jared
+  Monica
+  Richard
 `;
 
-const count = 2;
+const { topics } = weaveTopics(conceptMap, 1);
+
+console.log(topics);
+
+/*
+
+(Potential) Result:
+
+> ['Dinesh']
+
+*/
+```
+
+> **Make a list of narrative writing exercises:**
+
+```javascript
+const { weaveTopics } = require('topic-weaver');
+
+const conceptMap = `
+  #prompt
+  Write a [length] [genre] about [theme].
+
+  #length
+  1 paragraph
+  2 sentence
+  1 page
+
+  #genre
+  short story
+  poem
+  journal entry
+
+  #theme
+  fantasy battles
+  dystopian societies
+  sci-fi technology
+`;
+
+const count = 3;
 
 const { topics } = weaveTopics(conceptMap, count);
 
 console.log(topics);
+
+/*
+
+(Potential) Result:
+
+> [
+>   'Write a 1 page poem about dystopian societies.',
+>   'Write a 1 paragraph journal entry about fantasy battles.',
+>   'Write a 2 sentence short story about sci-fi technology.'
+> ]
+
+*/
 ```
 
-This will generate 2 random unique results using the provided concept map like so:
+### Advanced Examples
 
+> **Make a list of social media content ideas:**
+
+```javascript
+const { weaveTopics } = require('topic-weaver');
+
+const conceptMap = `
+  #social_media_content_ideas
+  Create [video_style] of [craft] for [platform]
+
+  #craft
+  drawing realistic portraits
+  setting up your studio
+  painting fan requested characters
+
+  #video_style
+  a timelapse
+  a quick before and after look
+  a fast slideshow
+  a single process shot
+
+  #platform
+  instagram
+  youtube
+  tiktok
+`;
+
+const count = 12;
+
+const { topics } = weaveTopics(conceptMap, count);
+
+console.log(topics.join('\n'));
+
+/*
+
+(Potential) Result:
+
+> Create a fast slideshow of painting fan requested characters for instagram
+> Create a quick before and after look of setting up your studio for tiktok
+> Create a single process shot of painting fan requested characters for instagram
+> Create a quick before and after look of painting fan requested characters for youtube
+> Create a single process shot of drawing realistic portraits for instagram
+> Create a timelapse of painting fan requested characters for tiktok
+> Create a single process shot of setting up your studio for tiktok
+> Create a timelapse of setting up your studio for instagram
+> Create a single process shot of painting fan requested characters for tiktok
+> Create a quick before and after look of painting fan requested characters for tiktok
+> Create a single process shot of setting up your studio for youtube
+> Create a fast slideshow of setting up your studio for instagram
+
+*/
 ```
-Draw a red circle.
-Draw a red square.
+
+> **Generate 3d models with matching dimensions:**
+
+```javascript
+const { weaveTopics } = require('topic-weaver');
+
+const conceptMap = `
+  #model
+  Construct a [color] [polygon]
+
+  #color
+  red
+  blue
+
+  #polygon
+  cube of [length] x [width] x [height*matching]
+  pyramid of [length] x [width] x [height*matching]
+
+  #length
+  100cm
+  200cm
+  300cm
+
+  #width
+  25cm
+  50cm
+  75cm
+
+  #height
+  200cm
+  300cm
+  400cm
+`;
+
+const count = 4;
+
+const { topics } = weaveTopics(conceptMap, count);
+
+console.log(topics.join('\n'));
+
+/*
+
+(Potential) Result:
+
+> Construct a blue pyramid of 100cm x 50cm x 300cm
+> Construct a red pyramid of 300cm x 50cm x 300cm
+> Construct a blue cube of 200cm x 75cm x 300cm
+> Construct a red cube of 200cm x 25cm x 300cm
+
+*/
 ```
 
 ## Documentation
 
+### Syntax
+
+```
+const { topics, issues } = weaveTopics(conceptMap, count);
+```
+
+- _**topics**_ is a `string[]` containing a list of generated strings
+- _**issues**_ is a `string[]` containing a list of issues during generation
+- _**conceptMap**_ is a multiline `string` formatted as follows:
+  - `#` followed by a string is a _concept id_
+  - any number of regular strings can be included separated by newlines after a line with `#` which are the results selected when that id is invoked
+  - `[id]` is where a _concept id_ is used to tell the generator how to traverse the tree when generating results
+  - `*` symbol followed by a string within `[]` like `[id*a]` is used to tell the generator to lock in the same value for any other instance of `[id*a]` during generation
+
+### Options
+
 |Option|Type|Description|Syntax
 |-|-|-|-|
-|**strictMode**|_boolean_|Throw an error if an issue occurs during topic generation|`weaveTopics(conceptMap, count, { generatorOptions: { strictMode: true } })`
-
->TODO: Update...
+|**strictMode**|_boolean_|Throw an error if an issue occurs during topic generation|`weaveTopics(conceptMap, count, { generatorOptions: { strictMode: true } })`|
+|**delimiter**|_string_|Custom seperator for each id or result string in a concept map (default is `\n`), note that this symbol cannot be used inside an id or result line|`weaveTopics(conceptMap, count, { parsingOptions: { delimiter: ';' } })`|
+|**idSymbol**|_string_|Custom identifier for an `id` line in a concept map (default is `#`), note that this symbol cannot be used inside the id or a result line|`weaveTopics(conceptMap, count, { parsingOptions: { idSymbol: '$' } })`|
+|**attemptLimit**|_number_|Limit of unique generation attempts before stopping the execution (default is `2000`)|`weaveTopics(conceptMap, count, { generatorOptions: { attemptLimit: 20 } })`|
+|**recursionLimit**|_number_|Limit of recursions occuring during topic generation before stopping execution (default is `2000`)|`weaveTopics(conceptMap, count, { generatorOptions: { recursionLimit: 9999 } })`|
 
 ## Development
 
